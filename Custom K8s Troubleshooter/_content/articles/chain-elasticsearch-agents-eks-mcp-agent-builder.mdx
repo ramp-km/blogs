@@ -12,7 +12,7 @@ date: "2026-04-08"
 image: "header.jpg"
 ---
 
-This guide shows how to keep a parent **Elasticsearch Observability** agent focused on traces, logs, and service graphs for triaging opentelemetry-demo application, running in AWS EKS, while you delegate live **Amazon EKS** inspection to a second agent that only exposes **EKS MCP** tools.
+This guide shows how to keep a parent **Elasticsearch Observability AI Agent** focused on traces, logs, and service graphs for triaging application issues (opentelemetry-demo application in this case), running in AWS EKS, while you delegate live **Amazon EKS** inspection to a second agent that only exposes **EKS MCP** tools.
 You wire the handoff with **Kibana Workflows** and Agent Builder **`converse`** API, then validate the setup by breaking **`product-catalog`** `targetPort` and running two prompts.
 Platform engineers and SREs who already run Elasticsearch for Observability get a repeatable pattern for safer, reviewable cluster access without overloading one agent with every tool.
 
