@@ -389,6 +389,12 @@ steps:
         <li>On <strong>Observability Agent v2</strong>, register that workflow as a <strong>tool</strong> (e.g. <strong><code>custom.k8s_troubleshooter</code></strong>).</li>
         <li>If you change the agent id, update both Agent Builder and the YAML so they match.</li>
       </ol>
+
+      <figure class="shot">
+        <img src="chained-agents-eks-mcp/images/05-workflow.png" width="960" alt="Kibana Workflows editor: k8s_troubleshooter workflow YAML enabled" loading="lazy" />
+        <figcaption><strong>Example.</strong> Workflows UI: <code>k8s_troubleshooter</code> definition imported and enabled (Step&nbsp;5, before registering the tool on the parent).</figcaption>
+      </figure>
+
       <p><strong>Success check:</strong> The parent lists the workflow tool; the specialist still works when called directly.</p>
 
       <figure class="shot">

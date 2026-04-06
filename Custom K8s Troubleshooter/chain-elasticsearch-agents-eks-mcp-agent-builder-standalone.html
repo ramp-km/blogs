@@ -76,7 +76,7 @@ Exact IAM, manifests, and connector fields stay in that README so this article s
 <p>You need an <strong>EKS</strong> cluster with <code>kubectl</code> configured.
 You need <strong>Elasticsearch</strong> and <strong>Kibana</strong> with Observability data, an OTLP endpoint, and an API key for the demo.
 You need <strong>Kibana 9.3+</strong> with <strong>Agent Builder</strong> and rights to create agents, MCP tools, and <strong>Workflows</strong>(<strong>Technical Preview</strong>).
-Budget about <strong>two to four hours</strong> the first time you run every step.</p>
+Budget about <strong>two to four hours</strong> the first time you run these steps.</p>
 <h2>Implementation walkthrough</h2>
 <h3>Step 1: Deploy the OpenTelemetry Demo and ship telemetry</h3>
 <p>Follow <a href="https://github.com/elastic/opentelemetry-demo"><strong>elastic/opentelemetry-demo</strong></a> for Kubernetes or EKS.
@@ -87,13 +87,13 @@ In Kibana (<strong>APM</strong>, <strong>Logs</strong>, or <strong>Service Map</
 <p><img src="chained-agents-eks-mcp/images/04-service-map-or-errors.png" alt="Healthy Elasticsearch Observability service map for demo services."></p>
 <h3>Step 2: Run the EKS MCP bridge and register the connector</h3>
 <p>Complete <a href="https://github.com/ramp-km/aws-eks-mcp-setup/blob/main/README.md"><strong>aws-eks-mcp-setup</strong></a> end to end.
-The flow is IAM for read-only cluster access, build and push the bridge image, IRSA and <strong>Kubernetes RBAC</strong>, deploy the bridge with a strong <strong><code>API_ACCESS_TOKEN</code></strong>, then expose the Service.
-In Kibana use <strong>Stack Management → Connectors → MCP</strong> with <strong><code>http://&lt;bridge-host&gt;:8888/mcp</code></strong> and <strong><code>Authorization: Bearer &lt;API_ACCESS_TOKEN&gt;</code></strong> until <strong>Test</strong> passes.</p>
+The flow you would be following is : IAM for read-only cluster access, build and push the bridge image, IRSA (IAM roles for service accounts) and <strong>Kubernetes RBAC</strong>, deploy the bridge with a strong <strong><code>API_ACCESS_TOKEN</code></strong>, then expose the bridge as a service.
+In Kibana use <strong>Stack Management → Connectors → MCP</strong> with <strong><code>http://&lt;loadbalancer-hostname&gt;:8888/mcp</code></strong> and <strong><code>Authorization: Bearer &lt;API_ACCESS_TOKEN&gt;</code></strong> until <strong>Test</strong> passes.</p>
 <p><strong>Takeaway:</strong> A green MCP connector proves Kibana can reach the bridge before you bulk-import tools.</p>
 <p><strong>Production notes:</strong> Restrict LoadBalancer security groups to known Elasticsearch egress, prefer <strong>TLS</strong> on real paths, store tokens in <strong>Secrets</strong>, and use <strong>read-only</strong> MCP modes when you only diagnose.</p>
 <p><img src="chained-agents-eks-mcp/images/05-eks-mcp.png" alt="MCP connector pointed at the EKS bridge."></p>
-<h3>Step 3: Create K8s Troubleshooter with EKS tools only</h3>
-<p>In Agent Builder create an agent whose id matches your workflow YAML (this guide uses <strong><code>k8s_troubleshooter</code></strong> and <a href="https://github.com/ramprasadkm/elastic-workflows/blob/main/k8s_troubleshooter.yaml"><strong>k8s_troubleshooter.yaml</strong></a>).
+<h3>Step 3: Create K8s Troubleshooter agent with EKS tools only</h3>
+<p>In Agent Builder, create an agent with agent ID : <strong>k8s_troubleshooter</strong> and custom instructions at <a href="https://github.com/ramp-km/blogs/blob/main/Custom%20K8s%20Troubleshooter/k8s_troubleshooter_agent.md"><strong>k8s_troubleshooter_agent</strong></a>.
 Use <strong>Manage MCP → Bulk import</strong> on your connector, then attach <strong>only</strong> those tools to <strong>K8s Troubleshooter</strong>.</p>
 <p><strong>Takeaway:</strong> Chat directly with <strong>K8s Troubleshooter</strong> once and confirm a harmless read (for example list pods in the demo namespace).</p>
 <p><img src="chained-agents-eks-mcp/images/02-k8s-troubleshooter-agent.png" alt="K8s Troubleshooter with EKS MCP tools attached."></p>
@@ -103,11 +103,10 @@ Do <strong>not</strong> attach EKS MCP tools to this copy.
 Append short guidance that tells the parent when to call the workflow (after Step 5), including namespace, resource names, and a short list of checks such as ports, selectors, Events, and logs.</p>
 <p><strong>Takeaway:</strong> The parent stays an Observability-first interface for the user.</p>
 <p><img src="chained-agents-eks-mcp/images/01-observability-agent-v2.png" alt="Observability Agent v2 tools and instructions."></p>
-<h3>Step 5: Import the workflow as a callable tool</h3>
-<p>Import <a href="https://github.com/ramprasadkm/elastic-workflows/blob/main/k8s_troubleshooter.yaml"><strong>k8s_troubleshooter.yaml</strong></a> in <strong>Kibana Workflows</strong> and enable it.
-The workflow must include the <strong><code>troubleshoot</code></strong> step that **<code>POST</code>**s <strong><code>/api/agent_builder/converse</code></strong> with <strong><code>agent_id: k8s_troubleshooter</code></strong> and <strong><code>{{ inputs.user_prompt }}</code></strong>.
-On <strong>Observability Agent v2</strong>, register that workflow as a tool (for example <strong><code>custom.k8s_troubleshooter</code></strong> or your org’s naming standard; align with Kibana).
-If you change <strong><code>agent_id</code></strong>, update both the YAML and the Agent Builder agent.</p>
+<h3>Step 5: Create the workflow and make it a callable tool</h3>
+<p>Create a new <strong>Kibana Workflow</strong> by importing the workflow definition at <a href="https://github.com/ramp-km/blogs/blob/main/Custom%20K8s%20Troubleshooter/k8s_troubleshooter_workflow.yaml"><strong>k8s_troubleshooter_workflow.yaml</strong></a> and enable it.
+On <strong>Observability Agent v2</strong>, register that workflow as a tool with tool name as <strong><code>custom.k8s_troubleshooter</code></strong> or your org’s naming standard.</p>
+<p><img src="chained-agents-eks-mcp/images/05-workflow.png" alt="Kibana Workflows editor: k8s_troubleshooter workflow YAML enabled."></p>
 <p><strong>Takeaway:</strong> The parent’s tool list should show the workflow, and <strong>K8s Troubleshooter</strong> should still answer when invoked alone.</p>
 <p><img src="chained-agents-eks-mcp/images/03-workflow-tool-parent-agent.png" alt="Workflow registered as a tool on the parent agent."></p>
 <h3>Step 6: Inject the product-catalog Service misconfiguration</h3>
@@ -123,10 +122,10 @@ kubectl get svc product-catalog -n &lt;namespace&gt; -o yaml
 <p><img src="chained-agents-eks-mcp/images/06-demo-services-service-map-or-errors.png" alt="Elasticsearch service map or error view after the misconfiguration."></p>
 <h3>Step 7: Run two prompts on the parent agent</h3>
 <p>Use Agent Builder chat on <strong>Observability Agent v2</strong>, not on the specialist.</p>
-<p><strong>Prompt 1:</strong> <em>Why are error rates increasing for services like checkout, frontend and recommendation?</em>
-Expect Observability tooling to narrow to <strong>product-catalog</strong>, then the workflow to run with a tight <strong><code>user_prompt</code></strong> (namespace, resource names, suspected Service or port issue, numbered checks).</p>
-<p><strong>Prompt 2:</strong> <em>Why is product-catalog service not servicing any requests in &lt;&lt;insert your k8s cluster name&gt;&gt;? Is there any misconfiguration in the service?</em>
-Expect <strong>K8s Troubleshooter</strong> to read <strong>Service</strong>, <strong>Endpoints</strong>, and pods, compare <strong><code>targetPort</code></strong> to <strong><code>containerPort</code></strong>, and explain the mismatch with evidence.</p>
+<p><strong>Prompt 1:</strong> <em>Why are error rates increasing for services like checkout, frontend and recommendation?</em></p>
+<p>Expect Observability tooling to narrow to <strong>product-catalog</strong>, without yet invoking <strong>custom.k8s_troubleshooter</strong> tool.</p>
+<p><strong>Prompt 2:</strong> <em>Why is product-catalog service not servicing any requests in &lt;&lt;insert your k8s cluster name&gt;&gt;? Is there any misconfiguration in the service?</em></p>
+<p>Expect <strong>Observability Agent v2</strong> to call <strong>custom.k8s_troubleshooter</strong> tool, which invokes <strong>K8s Troubleshooter</strong> agent and read <strong>Service</strong>, <strong>Endpoints</strong>, and pods, compare <strong><code>targetPort</code></strong> to <strong><code>containerPort</code></strong>, and explain the mismatch with evidence.</p>
 <p><strong>Takeaway:</strong> You see Observability-led triage and cluster-grounded confirmation in one thread.</p>
 <h3>Step 8: Roll back</h3>
 <p>Restore <strong><code>targetPort</code></strong> from your saved YAML or patch back to <strong>8080</strong> for this demo.</p>
@@ -136,7 +135,7 @@ Expect <strong>K8s Troubleshooter</strong> to read <strong>Service</strong>, <st
 <p>Add <strong><code>-n &amp;lt;namespace&amp;gt;</code></strong> when the Service is not in <strong><code>default</code></strong>.
 Confirm <strong>product-catalog</strong> and upstream services recover in Elasticsearch and in the demo UI.</p>
 <h2>Validation and trade-offs</h2>
-<p>You validated that <strong>Observability</strong> stays the main surface, that <strong>~20</strong> EKS tools live on one specialist, and that <strong>Workflow + converse</strong> records a clear boundary for audits and reviews.</p>
+<p>You validated that <strong>Observability Agent v2</strong> stays the main surface, that <strong>~20</strong> EKS tools live on one specialist <strong>K8s Troubleshooter</strong> agent, and that <strong>Workflow + converse API</strong> records a clear boundary for audits and reviews.</p>
 <p>Trade-offs: Workflows are <strong>Technical Preview</strong> in this path, MCP bridges need ongoing token and network hygiene, and you should keep mutating tools off or tightly RBAC-scoped until you accept the risk.</p>
 <h2>Conclusion and next steps</h2>
 <p>The same layout works for other runbooks: swap workflow steps, change <strong><code>agent_id</code></strong>, or add workflow inputs for <strong>cluster</strong> and <strong>region</strong> when you operate more than one EKS footprint.

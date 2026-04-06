@@ -6,6 +6,7 @@ Image assets for the walkthrough. The HTML and markdown reference these exact fi
   03-workflow-tool-parent-agent.png
   04-service-map-or-errors.png   (Step 1; maintain from "Elastic Observability service map - All good.png")
   05-eks-mcp.png                 (Step 2; maintain from "EKS MCP.png")
+  05-workflow.png                (Step 5; Kibana Workflows UI with k8s_troubleshooter YAML)
   06-demo-services-service-map-or-errors.png   (Step 6; maintain from "Elastic Observability service map or error rate view for demo services.png")
 
 Place files here; the standalone page is ../elastic-ai-agent-builder-blog-standalone.html

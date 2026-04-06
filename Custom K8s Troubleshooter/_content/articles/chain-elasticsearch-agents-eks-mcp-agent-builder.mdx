@@ -108,12 +108,12 @@ Append short guidance that tells the parent when to call the workflow (after Ste
 
 ![Observability Agent v2 tools and instructions.](/assets/images/chain-elasticsearch-agents-eks-mcp-agent-builder/step-04-observability-agent.png)
 
-### Step 5: Import the workflow as a callable tool
+### Step 5: Create the workflow and make it a callable tool
 
-Import [**k8s_troubleshooter.yaml**](https://github.com/ramprasadkm/elastic-workflows/blob/main/k8s_troubleshooter.yaml) in **Kibana Workflows** and enable it.
-The workflow must include the **`troubleshoot`** step that **`POST`**s **`/api/agent_builder/converse`** with **`agent_id: k8s_troubleshooter`** and **`{{ inputs.user_prompt }}`**.
-On **Observability Agent v2**, register that workflow as a tool (for example **`custom.k8s_troubleshooter`** or your org’s naming standard; align with Kibana).
-If you change **`agent_id`**, update both the YAML and the Agent Builder agent.
+Create a new **Kibana Workflow** by importing the workflow definition at [**k8s_troubleshooter_workflow.yaml**](https://github.com/ramp-km/blogs/blob/main/Custom%20K8s%20Troubleshooter/k8s_troubleshooter_workflow.yaml) and enable it.
+On **Observability Agent v2**, register that workflow as a tool with tool name as **`custom.k8s_troubleshooter`** or your org’s naming standard.
+
+![Kibana Workflows editor: k8s_troubleshooter workflow YAML enabled.](/assets/images/chain-elasticsearch-agents-eks-mcp-agent-builder/step-05-workflow.png)
 
 **Takeaway:** The parent’s tool list should show the workflow, and **K8s Troubleshooter** should still answer when invoked alone.
 
@@ -144,10 +144,12 @@ Callers still resolve **Endpoints**, but traffic lands on a port the container d
 Use Agent Builder chat on **Observability Agent v2**, not on the specialist.
 
 **Prompt 1:** *Why are error rates increasing for services like checkout, frontend and recommendation?*
-Expect Observability tooling to narrow to **product-catalog**, then the workflow to run with a tight **`user_prompt`** (namespace, resource names, suspected Service or port issue, numbered checks).
+
+Expect Observability tooling to narrow to **product-catalog**, without yet invoking **custom.k8s_troubleshooter** tool.
 
 **Prompt 2:** *Why is product-catalog service not servicing any requests in &lt;&lt;insert your k8s cluster name&gt;&gt;? Is there any misconfiguration in the service?*
-Expect **K8s Troubleshooter** to read **Service**, **Endpoints**, and pods, compare **`targetPort`** to **`containerPort`**, and explain the mismatch with evidence.
+
+Expect **Observability Agent v2** to call **custom.k8s_troubleshooter** tool, which invokes **K8s Troubleshooter** agent and read **Service**, **Endpoints**, and pods, compare **`targetPort`** to **`containerPort`**, and explain the mismatch with evidence.
 
 **Takeaway:** You see Observability-led triage and cluster-grounded confirmation in one thread.
 
@@ -165,7 +167,7 @@ Confirm **product-catalog** and upstream services recover in Elasticsearch and i
 
 ## Validation and trade-offs
 
-You validated that **Observability** stays the main surface, that **~20** EKS tools live on one specialist, and that **Workflow + converse** records a clear boundary for audits and reviews.
+You validated that **Observability Agent v2** stays the main surface, that **~20** EKS tools live on one specialist **K8s Troubleshooter** agent, and that **Workflow + converse API** records a clear boundary for audits and reviews.
 
 Trade-offs: Workflows are **Technical Preview** in this path, MCP bridges need ongoing token and network hygiene, and you should keep mutating tools off or tightly RBAC-scoped until you accept the risk.
 

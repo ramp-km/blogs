@@ -189,6 +189,8 @@ steps:
 2. On **Observability Agent v2**, add this workflow as a **callable tool** named per your setup (e.g. **`custom.k8s_troubleshooter`**).
 3. If your `agent_id` is not `k8s_troubleshooter`, update the YAML **and** the agent slug in Agent Builder so they match.
 
+![Kibana Workflows editor: k8s_troubleshooter workflow YAML enabled](images/05-workflow.png)
+
 **Success check:** The parent agent’s tool list includes the workflow, and the specialist still answers when invoked alone.
 
 ![Observability Agent v2 — `k8s_troubleshooter` workflow as a tool](images/03-workflow-tool-parent-agent.png)

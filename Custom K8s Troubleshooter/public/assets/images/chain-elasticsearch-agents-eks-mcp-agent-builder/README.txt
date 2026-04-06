@@ -5,6 +5,7 @@ Observability Labs image assets for this article (skill convention):
   step-02-mcp-connector.png  Optional: MCP connector (was images/05-eks-mcp.png)
   step-03-k8s-agent.png      Optional: specialist agent (was images/02-k8s-troubleshooter-agent.png)
   step-04-observability-agent.png
+  step-05-workflow.png           (workflow editor; source: chained-agents-eks-mcp/images/05-workflow.png)
   step-05-workflow-tool.png
   step-06-errors.png
 
