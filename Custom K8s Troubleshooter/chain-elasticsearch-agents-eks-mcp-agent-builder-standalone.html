@@ -98,9 +98,9 @@ Use <strong>Manage MCP → Bulk import</strong> on your connector, then attach <
 <p><strong>Takeaway:</strong> Chat directly with <strong>K8s Troubleshooter</strong> once and confirm a harmless read (for example list pods in the demo namespace).</p>
 <p><img src="chained-agents-eks-mcp/images/02-k8s-troubleshooter-agent.png" alt="K8s Troubleshooter with EKS MCP tools attached."></p>
 <h3>Step 4: Duplicate Observability Agent v2 without EKS tools</h3>
-<p>Duplicate the bundled <strong>Observability</strong> agent (for example <strong>Observability Agent v2</strong>) so it keeps the stock Observability system instructions and tools.
+<p>Duplicate the bundled <strong>Observability Agent</strong> and name it <strong>Observability Agent v2</strong>, so it keeps the stock Observability system instructions and tools.
 Do <strong>not</strong> attach EKS MCP tools to this copy.
-Append short guidance that tells the parent when to call the workflow (after Step 5), including namespace, resource names, and a short list of checks such as ports, selectors, Events, and logs.</p>
+Optionally, Append short guidance that tells the parent when to call the workflow tool (that you will setup after Step 5), including namespace, resource names, and a short list of checks such as ports, selectors, Events, and logs.</p>
 <p><strong>Takeaway:</strong> The parent stays an Observability-first interface for the user.</p>
 <p><img src="chained-agents-eks-mcp/images/01-observability-agent-v2.png" alt="Observability Agent v2 tools and instructions."></p>
 <h3>Step 5: Create the workflow and make it a callable tool</h3>
