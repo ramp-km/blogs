@@ -1,0 +1,2 @@
+https://github.com/ramprasadkm/elastic-workflows/blob/main/k8s_troubleshooter.yaml
+https://github.com/ramprasadkm/blogs/blob/main/Custom%20K8s%20Troubleshooter/chained-agents-eks-mcp/blog-custom-chained-agents-eks-mcp-elastic-ai-agent-builder.md

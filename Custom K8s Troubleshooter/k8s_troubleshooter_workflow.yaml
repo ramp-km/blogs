@@ -1,0 +1,78 @@
+# =============================================================================
+# Workflow: K8s Troubleshooter Agent
+# Description: Takes a user prompt describing a Kubernetes issue and invokes
+#              the k8s_troubleshooter AI agent to analyze and troubleshoot it.
+# Requires:    Elastic 9.3+ with Workflows enabled (Technical Preview)
+#              Agent Builder with k8s_troubleshooter agent configured
+# =============================================================================
+
+name: k8s_troubleshooter
+description: >
+  Accepts a user prompt describing a Kubernetes issue and delegates
+  the investigation to the k8s_troubleshooter AI agent. The agent uses
+  its configured tools to query indices, correlate data, and reason
+  across results to provide troubleshooting findings.
+enabled: true
+tags:
+  - kubernetes
+  - troubleshooting
+  - ai-agent
+  - observability
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# INPUTS - Parameters passed when the workflow is triggered
+# ═══════════════════════════════════════════════════════════════════════════════
+inputs:
+  - name: user_prompt
+    type: string
+    required: true
+    description: >
+      The user's natural language description of the Kubernetes issue
+      to troubleshoot. For example: "Pod crash-looping in namespace
+      production" or "High memory usage on node worker-03".
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TRIGGERS - How/when the workflow starts
+# ═══════════════════════════════════════════════════════════════════════════════
+triggers:
+  - type: manual
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STEPS - The workflow logic
+# ═══════════════════════════════════════════════════════════════════════════════
+steps:
+
+  # -------------------------------------------------------------------------
+  # Step 1: Log the incoming request
+  # -------------------------------------------------------------------------
+  - name: log_request
+    type: console
+    with:
+      message: |
+        K8s Troubleshooter workflow started.
+        User prompt: {{ inputs.user_prompt }}
+
+  # -------------------------------------------------------------------------
+  # Step 2: Invoke the k8s_troubleshooter AI agent via Kibana API
+  #   Calls the Agent Builder chat endpoint to send the user's prompt
+  #   to the k8s_troubleshooter agent. The agent uses its configured
+  #   tools to query indices, correlate data, and reason across results.
+  # -------------------------------------------------------------------------
+  - name: troubleshoot
+    type: kibana.request
+    with:
+      method: POST
+      path: /api/agent_builder/converse
+      body:
+        agent_id: k8s_troubleshooter
+        input: "{{ inputs.user_prompt }}"
+
+  # -------------------------------------------------------------------------
+  # Step 3: Log the agent's findings
+  # -------------------------------------------------------------------------
+  - name: log_findings
+    type: console
+    with:
+      message: |
+        K8s Troubleshooter agent completed.
+        Findings: {{ steps.troubleshoot.output.response.message }}

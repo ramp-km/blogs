@@ -1,0 +1,12 @@
+{
+  "name": "custom-k8s-troubleshooter-blog",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "export:html": "node scripts/export-mdx-standalone-html.mjs"
+  },
+  "devDependencies": {
+    "gray-matter": "^4.0.3",
+    "marked": "^15.0.0"
+  }
+}
