@@ -35,7 +35,7 @@
       <h1>Chain Observability AI Agent and a specialized domain (K8s) agent in Elasticsearch</h1>
       <p class="meta">2026-04-08 · opentelemetry, observability, kubernetes</p>
     </header>
-    <article><p>This guide shows how to keep a parent <strong>Elasticsearch Observability</strong> agent focused on traces, logs, and service graphs for triaging opentelemetry-demo application, running in AWS EKS, while you delegate live <strong>Amazon EKS</strong> inspection to a second agent that only exposes <strong>EKS MCP</strong> tools.
+    <article><p>This guide shows how to keep a parent <strong>Elasticsearch Observability AI Agent</strong> focused on traces, logs, and service graphs for triaging application issues (opentelemetry-demo application in this case), running in AWS EKS, while you delegate live <strong>Amazon EKS</strong> inspection to a second agent that only exposes <strong>EKS MCP</strong> tools.
 You wire the handoff with <strong>Kibana Workflows</strong> and Agent Builder <strong><code>converse</code></strong> API, then validate the setup by breaking <strong><code>product-catalog</code></strong> <code>targetPort</code> and running two prompts.
 Platform engineers and SREs who already run Elasticsearch for Observability get a repeatable pattern for safer, reviewable cluster access without overloading one agent with every tool.</p>
 <h2>Problem context</h2>
