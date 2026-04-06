@@ -94,7 +94,7 @@ In Kibana use <strong>Stack Management → Connectors → MCP</strong> with <str
 <p><img src="chained-agents-eks-mcp/images/05-eks-mcp.png" alt="MCP connector pointed at the EKS bridge."></p>
 <h3>Step 3: Create K8s Troubleshooter agent with EKS tools only</h3>
 <p>In Agent Builder, create an agent with agent ID : <strong>k8s_troubleshooter</strong> and custom instructions at <a href="https://github.com/ramp-km/blogs/blob/main/Custom%20K8s%20Troubleshooter/k8s_troubleshooter_agent.md"><strong>k8s_troubleshooter_agent</strong></a>.
-Use <strong>Manage MCP → Bulk import</strong> on your connector, then attach <strong>only</strong> those tools to <strong>K8s Troubleshooter</strong>.</p>
+Use <strong>Manage MCP → Bulk import</strong> on your connector, then attach <strong>only</strong> those <strong>eks</strong> tools to <strong>K8s Troubleshooter</strong>.</p>
 <p><strong>Takeaway:</strong> Chat directly with <strong>K8s Troubleshooter</strong> once and confirm a harmless read (for example list pods in the demo namespace).</p>
 <p><img src="chained-agents-eks-mcp/images/02-k8s-troubleshooter-agent.png" alt="K8s Troubleshooter with EKS MCP tools attached."></p>
 <h3>Step 4: Duplicate Observability Agent v2 without EKS tools</h3>
