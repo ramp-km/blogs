@@ -11,8 +11,14 @@ import { marked } from "marked";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 
-const mdxPath = path.resolve(root, process.argv[2] || "_content/articles/chain-elasticsearch-agents-eks-mcp-agent-builder.mdx");
-const outPath = path.resolve(root, process.argv[3] || "chain-elasticsearch-agents-eks-mcp-agent-builder-standalone.html");
+const mdxPath = path.resolve(
+  root,
+  process.argv[2] || "_content/articles/chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting.mdx",
+);
+const outPath = path.resolve(
+  root,
+  process.argv[3] || "chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting-standalone.html",
+);
 
 const src = fs.readFileSync(mdxPath, "utf8");
 const { data, content } = matter(src);
@@ -32,7 +38,7 @@ const imgMap = {
 };
 
 function fixAssets(html) {
-  const prefix = "/assets/images/chain-elasticsearch-agents-eks-mcp-agent-builder/";
+  const prefix = "/assets/images/chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting/";
   let out = html;
   for (const [k, v] of Object.entries(imgMap)) {
     out = out.split(`${prefix}${k}`).join(`chained-agents-eks-mcp/images/${v}`);

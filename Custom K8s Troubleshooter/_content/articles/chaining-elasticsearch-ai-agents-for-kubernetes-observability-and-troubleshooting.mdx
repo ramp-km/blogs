@@ -1,13 +1,14 @@
 ---
-title: "Chaining Elasticsearch Observability agents with an EKS MCP Kubernetes expert"
-slug: "chain-elasticsearch-agents-eks-mcp-agent-builder"
-description: "Run the OpenTelemetry demo on EKS, wire Elasticsearch Observability to a Kubernetes specialist via Workflows and MCP, and triage a Service misconfiguration with two chat prompts."
+title: "Chaining Elasticsearch AI Agents for Kubernetes Observability and Troubleshooting"
+slug: "chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting"
+description: "Run the OpenTelemetry demo on EKS, wire Elasticsearch Observability agent to a Kubernetes specialist agent via Workflows and MCP, and triage a Service misconfiguration with two chat prompts."
 author:
   - slug: "ramprasadkm"
 tags:
   - slug: "opentelemetry"
   - slug: "observability"
   - slug: "kubernetes"
+  - slug: "ai agents"
 date: "2026-04-08"
 image: "header.jpg"
 ---
@@ -55,7 +56,7 @@ flowchart LR
   Bridge --> Demo
 ```
 
-![Architecture: parent agent, workflow, specialist, bridge, and demo workloads.](/assets/images/chain-elasticsearch-agents-eks-mcp-agent-builder/header.jpg)
+![Architecture: parent agent, workflow, specialist, bridge, and demo workloads.](/assets/images/chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting/header.jpg)
 
 ## Before you start
 
@@ -75,7 +76,7 @@ In Kibana (**APM**, **Logs**, or **Service Map**), confirm data for **checkout**
 
 **Takeaway:** If you see healthy traffic to **product-catalog**, you are ready for the failure drill.
 
-![Healthy Elasticsearch Observability service map for demo services.](/assets/images/chain-elasticsearch-agents-eks-mcp-agent-builder/step-01-service-map.png)
+![Healthy Elasticsearch Observability service map for demo services.](/assets/images/chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting/step-01-service-map.png)
 
 ### Step 2: Run the EKS MCP bridge, register the connector and bulk import EKS MCP tools
 
@@ -86,7 +87,7 @@ The flow you would be following is : IAM for read-only cluster access, build and
 
 **Production notes:** Restrict LoadBalancer security groups to known Elasticsearch egress, prefer **TLS** on real paths, store tokens in **Secrets**, and use **read-only** MCP modes when you only diagnose.
 
-![MCP connector pointed at the EKS bridge.](/assets/images/chain-elasticsearch-agents-eks-mcp-agent-builder/step-02-mcp-connector.png)
+![MCP connector pointed at the EKS bridge.](/assets/images/chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting/step-02-mcp-connector.png)
 
 ### Step 3: Create K8s Troubleshooter agent with EKS tools only
 
@@ -95,7 +96,7 @@ Attach **only** **EKS MCP** tools to this agent.
 
 **Takeaway:** Chat directly with **K8s Troubleshooter** once and confirm a harmless read (for example list pods in the demo namespace).
 
-![K8s Troubleshooter with EKS MCP tools attached.](/assets/images/chain-elasticsearch-agents-eks-mcp-agent-builder/step-03-k8s-agent.png)
+![K8s Troubleshooter with EKS MCP tools attached.](/assets/images/chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting/step-03-k8s-agent.png)
 
 ### Step 4: Clone Observability Agent without EKS tools
 
@@ -105,23 +106,23 @@ Optionally, Append short guidance that tells the parent when to call the workflo
 
 **Takeaway:** The parent **Observability Agent v2** stays an Observability-first interface for the user.
 
-![Observability Agent v2 tools and instructions.](/assets/images/chain-elasticsearch-agents-eks-mcp-agent-builder/step-04-observability-agent.png)
+![Observability Agent v2 tools and instructions.](/assets/images/chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting/step-04-observability-agent.png)
 
 ### Step 5: Create the workflow and make it a callable tool
 
 Create a new **Kibana Workflow** by importing the workflow definition at [**k8s_troubleshooter_workflow.yaml**](https://github.com/ramp-km/blogs/blob/main/Custom%20K8s%20Troubleshooter/k8s_troubleshooter_workflow.yaml) and enable it.
 
-![Kibana Workflows editor: k8s_troubleshooter workflow YAML enabled.](/assets/images/chain-elasticsearch-agents-eks-mcp-agent-builder/step-05-workflow.png)
+![Kibana Workflows editor: k8s_troubleshooter workflow YAML enabled.](/assets/images/chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting/step-05-workflow.png)
 
 Create a new tool in agent builder, of type: **Workflow**, select **k8s_troubleshooter** workflow that you created, provide a suitable tool_id: **custom.k8s_troubleshooter** and a suitable tool description: **Tool to triage and troubleshoot kubernetes related issues**
 
-![Agent Builder: Workflow tool wired to k8s_troubleshooter with custom tool id and description.](/assets/images/chain-elasticsearch-agents-eks-mcp-agent-builder/step-05-workflow-tool-k8s-troubleshooter.png)
+![Agent Builder: Workflow tool wired to k8s_troubleshooter with custom tool id and description.](/assets/images/chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting/step-05-workflow-tool-k8s-troubleshooter.png)
 
 On **Observability Agent v2**, attach the workflow tool that you just created.
 
 **Takeaway:** The parent’s tool list should show the workflow, and **K8s Troubleshooter** should still answer when invoked alone.
 
-![Workflow registered as a tool on the parent agent.](/assets/images/chain-elasticsearch-agents-eks-mcp-agent-builder/step-05-workflow-tool.png)
+![Workflow registered as a tool on the parent agent.](/assets/images/chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting/step-05-workflow-tool.png)
 
 ### Step 6: Inject the product-catalog Service misconfiguration
 
@@ -145,7 +146,7 @@ Callers still resolve **Endpoints**, but traffic lands on a port the container d
 
 **Takeaway:** You now have symptoms in Elasticsearch and a clear cluster-side fault.
 
-![Elasticsearch service map or error view after the misconfiguration.](/assets/images/chain-elasticsearch-agents-eks-mcp-agent-builder/step-06-errors.png)
+![Elasticsearch service map or error view after the misconfiguration.](/assets/images/chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting/step-06-errors.png)
 
 ### Step 7: Run two prompts on the parent agent
 
@@ -161,7 +162,7 @@ Expect **Observability Agent v2** to call **custom.k8s_troubleshooter** tool, wh
 
 **Takeaway:** You see Observability AI Agent-led triage and cluster-grounded confirmation in one thread.
 
-![Agent Builder chat on Observability Agent v2 invoking the K8s troubleshooter workflow.](/assets/images/chain-elasticsearch-agents-eks-mcp-agent-builder/step-07-ai-agent-chat-custom-k8s-troubleshooter.png)
+![Agent Builder chat on Observability Agent v2 invoking the K8s troubleshooter workflow.](/assets/images/chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting/step-07-ai-agent-chat-custom-k8s-troubleshooter.png)
 
 ### Step 8: Roll back
 
@@ -187,7 +188,7 @@ Trade-offs: Workflows are **Technical Preview** in this path, MCP bridges need o
 
 ## Conclusion and next steps
 
-The same layout works for other runbooks: swap workflow steps, change **`agent_id`**, or add workflow inputs for **cluster** and **region** when you operate more than one EKS footprint.
+The same layout works for other runbooks: extend to self-managed kubernetes / AKS / GKE, swap workflow steps, change **`agent_id`**, or add workflow inputs for **cluster** and **region** when you operate more than one EKS footprint.
 Tighten RBAC before you grant write-capable MCP tools, and consider alert-driven workflow triggers once the manual path is trusted.
 
 **Agent instructions:** The long **K8s Troubleshooter** system prompt in the original standalone article remains a useful reference; keep it in source control next to the agent and refresh both when you change runbooks.
