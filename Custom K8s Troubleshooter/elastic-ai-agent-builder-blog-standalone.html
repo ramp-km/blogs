@@ -429,6 +429,11 @@ kubectl get svc product-catalog -n &lt;namespace&gt; -o yaml</code></pre>
       <p><strong>You:</strong> <em>Why is product-catalog service not servicing any requests in &lt;&lt;insert your k8s cluster name&gt;&gt;? Is there any misconfiguration in the service?</em></p>
       <p><strong>Expect:</strong> The workflow drives <strong>K8s Troubleshooter</strong> to read Service / Endpoints / pods, compare <code>targetPort</code> to <code>containerPort</code>, and explain the mismatch using cluster evidence.</p>
 
+      <figure class="shot">
+        <img src="chained-agents-eks-mcp/images/07-ai-agent-chat-custom-k8s-troubleshooter.png" width="960" alt="Agent Builder chat on parent agent with K8s troubleshooter workflow" loading="lazy" />
+        <figcaption><strong>Example.</strong> Parent agent chat after Step&nbsp;7 prompts (Observability plus delegated cluster checks).</figcaption>
+      </figure>
+
       <hr />
 
       <h2>Step 8 &mdash; Roll back and verify</h2>

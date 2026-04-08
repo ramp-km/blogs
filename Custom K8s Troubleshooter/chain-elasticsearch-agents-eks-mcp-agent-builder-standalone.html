@@ -85,28 +85,29 @@ Confirm workloads are <strong>Running</strong> and note the namespace (often sim
 In Kibana (<strong>APM</strong>, <strong>Logs</strong>, or <strong>Service Map</strong>), confirm data for <strong>checkout</strong>, <strong>frontend</strong>, <strong>recommendation</strong>, and <strong>product-catalog</strong>.</p>
 <p><strong>Takeaway:</strong> If you see healthy traffic to <strong>product-catalog</strong>, you are ready for the failure drill.</p>
 <p><img src="chained-agents-eks-mcp/images/04-service-map-or-errors.png" alt="Healthy Elasticsearch Observability service map for demo services."></p>
-<h3>Step 2: Run the EKS MCP bridge and register the connector</h3>
+<h3>Step 2: Run the EKS MCP bridge, register the connector and bulk import EKS MCP tools</h3>
 <p>Complete <a href="https://github.com/ramp-km/aws-eks-mcp-setup/blob/main/README.md"><strong>aws-eks-mcp-setup</strong></a> end to end.
-The flow you would be following is : IAM for read-only cluster access, build and push the bridge image, IRSA (IAM roles for service accounts) and <strong>Kubernetes RBAC</strong>, deploy the bridge with a strong <strong><code>API_ACCESS_TOKEN</code></strong>, then expose the bridge as a service.
-In Kibana use <strong>Stack Management → Connectors → MCP</strong> with <strong><code>http://&lt;loadbalancer-hostname&gt;:8888/mcp</code></strong> and <strong><code>Authorization: Bearer &lt;API_ACCESS_TOKEN&gt;</code></strong> until <strong>Test</strong> passes.</p>
+The flow you would be following is : IAM for read-only cluster access, build and push the bridge image, IRSA (IAM roles for service accounts) and <strong>Kubernetes RBAC</strong>, deploy the bridge with a strong <strong><code>API_ACCESS_TOKEN</code></strong>, then expose the bridge as a service, test the MCP connection and bulk import tools.</p>
 <p><strong>Takeaway:</strong> A green MCP connector proves Kibana can reach the bridge before you bulk-import tools.</p>
 <p><strong>Production notes:</strong> Restrict LoadBalancer security groups to known Elasticsearch egress, prefer <strong>TLS</strong> on real paths, store tokens in <strong>Secrets</strong>, and use <strong>read-only</strong> MCP modes when you only diagnose.</p>
 <p><img src="chained-agents-eks-mcp/images/05-eks-mcp.png" alt="MCP connector pointed at the EKS bridge."></p>
 <h3>Step 3: Create K8s Troubleshooter agent with EKS tools only</h3>
-<p>In Agent Builder, create an agent with agent ID : <strong>k8s_troubleshooter</strong> and custom instructions at <a href="https://github.com/ramp-km/blogs/blob/main/Custom%20K8s%20Troubleshooter/k8s_troubleshooter_agent.md"><strong>k8s_troubleshooter_agent</strong></a>.
-Use <strong>Manage MCP → Bulk import</strong> on your connector, then attach <strong>only</strong> those <strong>eks</strong> tools to <strong>K8s Troubleshooter</strong>.</p>
+<p>In Agent Builder, create an agent with agent ID : <strong>k8s_troubleshooter</strong>, display name : <strong>K8s Troubleshooter</strong>, custom instructions at <a href="https://github.com/ramp-km/blogs/blob/main/Custom%20K8s%20Troubleshooter/k8s_troubleshooter_agent.md"><strong>k8s_troubleshooter_agent</strong></a>.
+Attach <strong>only</strong> <strong>EKS MCP</strong> tools to this agent.</p>
 <p><strong>Takeaway:</strong> Chat directly with <strong>K8s Troubleshooter</strong> once and confirm a harmless read (for example list pods in the demo namespace).</p>
 <p><img src="chained-agents-eks-mcp/images/02-k8s-troubleshooter-agent.png" alt="K8s Troubleshooter with EKS MCP tools attached."></p>
-<h3>Step 4: Duplicate Observability Agent v2 without EKS tools</h3>
-<p>Duplicate the bundled <strong>Observability Agent</strong> and name it <strong>Observability Agent v2</strong>, so it keeps the stock Observability system instructions and tools.
+<h3>Step 4: Clone Observability Agent without EKS tools</h3>
+<p>Clone the bundled <strong>Observability Agent</strong> and name it <strong>Observability Agent v2</strong>, so it keeps the stock Observability system instructions and tools.
 Do <strong>not</strong> attach EKS MCP tools to this copy.
 Optionally, Append short guidance that tells the parent when to call the workflow tool (that you will setup after Step 5), including namespace, resource names, and a short list of checks such as ports, selectors, Events, and logs.</p>
-<p><strong>Takeaway:</strong> The parent stays an Observability-first interface for the user.</p>
+<p><strong>Takeaway:</strong> The parent <strong>Observability Agent v2</strong> stays an Observability-first interface for the user.</p>
 <p><img src="chained-agents-eks-mcp/images/01-observability-agent-v2.png" alt="Observability Agent v2 tools and instructions."></p>
 <h3>Step 5: Create the workflow and make it a callable tool</h3>
-<p>Create a new <strong>Kibana Workflow</strong> by importing the workflow definition at <a href="https://github.com/ramp-km/blogs/blob/main/Custom%20K8s%20Troubleshooter/k8s_troubleshooter_workflow.yaml"><strong>k8s_troubleshooter_workflow.yaml</strong></a> and enable it.
-On <strong>Observability Agent v2</strong>, register that workflow as a tool with tool name as <strong><code>custom.k8s_troubleshooter</code></strong> or your org’s naming standard.</p>
+<p>Create a new <strong>Kibana Workflow</strong> by importing the workflow definition at <a href="https://github.com/ramp-km/blogs/blob/main/Custom%20K8s%20Troubleshooter/k8s_troubleshooter_workflow.yaml"><strong>k8s_troubleshooter_workflow.yaml</strong></a> and enable it.</p>
 <p><img src="chained-agents-eks-mcp/images/05-workflow.png" alt="Kibana Workflows editor: k8s_troubleshooter workflow YAML enabled."></p>
+<p>Create a new tool in agent builder, of type: <strong>Workflow</strong>, select <strong>k8s_troubleshooter</strong> workflow that you created, provide a suitable tool_id: <strong>custom.k8s_troubleshooter</strong> and a suitable tool description: <strong>Tool to triage and troubleshoot kubernetes related issues</strong></p>
+<p><img src="chained-agents-eks-mcp/images/05-workflow_tool_k8s_troubleshooter.png" alt="Agent Builder: Workflow tool wired to k8s_troubleshooter with custom tool id and description."></p>
+<p>On <strong>Observability Agent v2</strong>, attach the workflow tool that you just created.</p>
 <p><strong>Takeaway:</strong> The parent’s tool list should show the workflow, and <strong>K8s Troubleshooter</strong> should still answer when invoked alone.</p>
 <p><img src="chained-agents-eks-mcp/images/03-workflow-tool-parent-agent.png" alt="Workflow registered as a tool on the parent agent."></p>
 <h3>Step 6: Inject the product-catalog Service misconfiguration</h3>
@@ -117,22 +118,27 @@ kubectl get svc product-catalog -n &lt;namespace&gt; -o yaml
 <pre><code class="language-bash">kubectl patch svc product-catalog -n &lt;namespace&gt; --type=&#39;json&#39; \
   -p=&#39;[{&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/spec/ports/0/targetPort&quot;, &quot;value&quot;: 9999}]&#39;
 </code></pre>
+<pre><code class="language-bash">kubectl rollout restart deployment/checkout deployment/recommendation deployment/frontend -n default
+</code></pre>
 <p>Callers still resolve <strong>Endpoints</strong>, but traffic lands on a port the container does not listen on, so Elasticsearch shows downstream errors on <strong>checkout</strong>, <strong>frontend</strong>, and <strong>recommendation</strong>.</p>
 <p><strong>Takeaway:</strong> You now have symptoms in Elasticsearch and a clear cluster-side fault.</p>
 <p><img src="chained-agents-eks-mcp/images/06-demo-services-service-map-or-errors.png" alt="Elasticsearch service map or error view after the misconfiguration."></p>
 <h3>Step 7: Run two prompts on the parent agent</h3>
 <p>Use Agent Builder chat on <strong>Observability Agent v2</strong>, not on the specialist.</p>
-<p><strong>Prompt 1:</strong> <em>Why are error rates increasing for services like checkout, frontend and recommendation?</em></p>
+<p><strong>Prompt 1:</strong> <em>Why are failure transactions increasing for services like checkout and frontend?</em></p>
 <p>Expect Observability tooling to narrow to <strong>product-catalog</strong>, without yet invoking <strong>custom.k8s_troubleshooter</strong> tool.</p>
 <p><strong>Prompt 2:</strong> <em>Why is product-catalog service not servicing any requests in &lt;&lt;insert your k8s cluster name&gt;&gt;? Is there any misconfiguration in the service?</em></p>
 <p>Expect <strong>Observability Agent v2</strong> to call <strong>custom.k8s_troubleshooter</strong> tool, which invokes <strong>K8s Troubleshooter</strong> agent and read <strong>Service</strong>, <strong>Endpoints</strong>, and pods, compare <strong><code>targetPort</code></strong> to <strong><code>containerPort</code></strong>, and explain the mismatch with evidence.</p>
-<p><strong>Takeaway:</strong> You see Observability-led triage and cluster-grounded confirmation in one thread.</p>
+<p><strong>Takeaway:</strong> You see Observability AI Agent-led triage and cluster-grounded confirmation in one thread.</p>
+<p><img src="chained-agents-eks-mcp/images/07-ai-agent-chat-custom-k8s-troubleshooter.png" alt="Agent Builder chat on Observability Agent v2 invoking the K8s troubleshooter workflow."></p>
 <h3>Step 8: Roll back</h3>
 <p>Restore <strong><code>targetPort</code></strong> from your saved YAML or patch back to <strong>8080</strong> for this demo.</p>
 <pre><code class="language-bash">kubectl patch svc product-catalog --type=&#39;json&#39; \
   -p=&#39;[{&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/spec/ports/0/targetPort&quot;, &quot;value&quot;: 8080}]&#39;
 </code></pre>
-<p>Add <strong><code>-n &amp;lt;namespace&amp;gt;</code></strong> when the Service is not in <strong><code>default</code></strong>.
+<pre><code class="language-bash">kubectl rollout restart deployment/checkout deployment/recommendation deployment/frontend -n default
+</code></pre>
+<p>Add <strong><code>-n &lt;namespace&gt;</code></strong> when the Service is not in <strong><code>default</code></strong>.
 Confirm <strong>product-catalog</strong> and upstream services recover in Elasticsearch and in the demo UI.</p>
 <h2>Validation and trade-offs</h2>
 <p>You validated that <strong>Observability Agent v2</strong> stays the main surface, that <strong>~20</strong> EKS tools live on one specialist <strong>K8s Troubleshooter</strong> agent, and that <strong>Workflow + converse API</strong> records a clear boundary for audits and reviews.</p>

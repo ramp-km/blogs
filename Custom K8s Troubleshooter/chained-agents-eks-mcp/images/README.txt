@@ -7,7 +7,9 @@ Image assets for the walkthrough. The HTML and markdown reference these exact fi
   04-service-map-or-errors.png   (Step 1; maintain from "Elastic Observability service map - All good.png")
   05-eks-mcp.png                 (Step 2; maintain from "EKS MCP.png")
   05-workflow.png                (Step 5; Kibana Workflows UI with k8s_troubleshooter YAML)
+  05-workflow_tool_k8s_troubleshooter.png   (Step 5; Agent Builder Workflow tool for k8s_troubleshooter)
   06-demo-services-service-map-or-errors.png   (Step 6; maintain from "Elastic Observability service map or error rate view for demo services.png")
+  07-ai-agent-chat-custom-k8s-troubleshooter.png   (Step 7; Agent Builder parent chat with workflow / K8s triage)
 
 Place files here; the standalone page is ../elastic-ai-agent-builder-blog-standalone.html
 and loads them via chained-agents-eks-mcp/images/<filename>.

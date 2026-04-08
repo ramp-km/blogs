@@ -239,6 +239,8 @@ Open **Agent Builder** chat on the **parent** agent (not the specialist).
 
 **What you want to see:** The workflow runs **K8s Troubleshooter**, which uses **`read_k8s_resource`** / **`list_k8s_resources`** (Service, Endpoints, pods, ports), compares **`targetPort`** to **containerPort**, and explains the mismatch tying back to Elasticsearch symptoms.
 
+![Agent Builder chat on Observability Agent v2 invoking the K8s troubleshooter workflow](images/07-ai-agent-chat-custom-k8s-troubleshooter.png)
+
 ---
 
 ## Step 8 — Roll back and verify

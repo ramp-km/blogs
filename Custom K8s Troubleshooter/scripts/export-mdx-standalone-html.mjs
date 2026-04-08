@@ -24,8 +24,10 @@ const imgMap = {
   "step-03-k8s-agent.png": "02-k8s-troubleshooter-agent.png",
   "step-04-observability-agent.png": "01-observability-agent-v2.png",
   "step-05-workflow.png": "05-workflow.png",
+  "step-05-workflow-tool-k8s-troubleshooter.png": "05-workflow_tool_k8s_troubleshooter.png",
   "step-05-workflow-tool.png": "03-workflow-tool-parent-agent.png",
   "step-06-errors.png": "06-demo-services-service-map-or-errors.png",
+  "step-07-ai-agent-chat-custom-k8s-troubleshooter.png": "07-ai-agent-chat-custom-k8s-troubleshooter.png",
   "header.jpg": "04-service-map-or-errors.png",
 };
 
