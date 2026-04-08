@@ -12,5 +12,6 @@ Observability Labs image assets for this article (skill convention):
   step-07-ai-agent-chat-custom-k8s-troubleshooter.png  (source: chained-agents-eks-mcp/images/07-ai-agent-chat-custom-k8s-troubleshooter.png)
 
 Inline reference in MDX: /assets/images/chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting/<filename>
+  (Files live under public/assets/images/... in this repo; URLs always start with /assets/images/...)
 
 Copy or export from chained-agents-eks-mcp/images/ and rename to match.

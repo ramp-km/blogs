@@ -1,4 +1,4 @@
 ---
 name: "Ramprasad KM"
-slug: "ramprasadkm"
+slug: "ramp-km"
 ---

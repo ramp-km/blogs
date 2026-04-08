@@ -33,7 +33,7 @@
   <div class="wrap">
     <header>
       <h1>Chaining Elasticsearch AI Agents for Kubernetes Observability and Troubleshooting</h1>
-      <p class="meta">2026-04-08 · opentelemetry, observability, kubernetes, ai agents</p>
+      <p class="meta">2026-04-08 · opentelemetry, observability, kubernetes, ai-agents</p>
     </header>
     <article><p>This guide shows how to keep a parent <strong>Elasticsearch Observability AI Agent</strong> focused on traces, logs, and service graphs for triaging application issues (opentelemetry-demo application in this case), running in AWS EKS, while you delegate live <strong>Amazon EKS</strong> inspection to a second agent that only exposes <strong>EKS MCP</strong> tools.
 You wire the handoff with <strong>Kibana Workflows</strong> and Agent Builder <strong><code>converse</code></strong> API, then validate the setup by breaking <strong><code>product-catalog</code></strong> <code>targetPort</code> and running two prompts.
@@ -71,7 +71,6 @@ Exact IAM, manifests, and connector fields stay in that README so this article s
 
 
 
-<p><img src="chained-agents-eks-mcp/images/04-service-map-or-errors.png" alt="Architecture: parent agent, workflow, specialist, bridge, and demo workloads."></p>
 <h2>Before you start</h2>
 <p>You need an <strong>EKS</strong> cluster with <code>kubectl</code> configured.
 You need <strong>Elasticsearch</strong> and <strong>Kibana</strong> with Observability data, an OTLP endpoint, and an API key for the demo.

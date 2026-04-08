@@ -35,6 +35,7 @@ const imgMap = {
   "step-06-errors.png": "06-demo-services-service-map-or-errors.png",
   "step-07-ai-agent-chat-custom-k8s-troubleshooter.png": "07-ai-agent-chat-custom-k8s-troubleshooter.png",
   "header.jpg": "04-service-map-or-errors.png",
+  "header.png": "04-service-map-or-errors.png",
 };
 
 function fixAssets(html) {

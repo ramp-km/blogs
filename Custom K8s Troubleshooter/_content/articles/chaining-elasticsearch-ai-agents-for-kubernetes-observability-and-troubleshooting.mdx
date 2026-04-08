@@ -3,14 +3,14 @@ title: "Chaining Elasticsearch AI Agents for Kubernetes Observability and Troubl
 slug: "chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting"
 description: "Run the OpenTelemetry demo on EKS, wire Elasticsearch Observability agent to a Kubernetes specialist agent via Workflows and MCP, and triage a Service misconfiguration with two chat prompts."
 author:
-  - slug: "ramprasadkm"
+  - slug: "ramp-km"
 tags:
   - slug: "opentelemetry"
   - slug: "observability"
   - slug: "kubernetes"
-  - slug: "ai agents"
+  - slug: "ai-agents"
 date: "2026-04-08"
-image: "header.jpg"
+image: "/assets/images/chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting/header.png"
 ---
 
 This guide shows how to keep a parent **Elasticsearch Observability AI Agent** focused on traces, logs, and service graphs for triaging application issues (opentelemetry-demo application in this case), running in AWS EKS, while you delegate live **Amazon EKS** inspection to a second agent that only exposes **EKS MCP** tools.
@@ -55,8 +55,6 @@ flowchart LR
   KT --> Bridge
   Bridge --> Demo
 ```
-
-![Architecture: parent agent, workflow, specialist, bridge, and demo workloads.](/assets/images/chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting/header.jpg)
 
 ## Before you start
 
