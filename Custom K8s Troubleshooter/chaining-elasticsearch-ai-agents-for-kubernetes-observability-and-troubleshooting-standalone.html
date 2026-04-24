@@ -33,48 +33,31 @@
   <div class="wrap">
     <header>
       <h1>Chaining Elasticsearch AI Agents for Kubernetes Observability and Troubleshooting</h1>
-      <p class="meta">2026-04-08 · opentelemetry, observability, kubernetes, ai-agents</p>
+      <p class="meta">2026-04-22 · opentelemetry, observability, kubernetes, ai-agents, mcp</p>
     </header>
-    <article><p>This guide shows how to keep a parent <strong>Elasticsearch Observability AI Agent</strong> focused on traces, logs, and service graphs for triaging application issues (opentelemetry-demo application in this case), running in AWS EKS, while you delegate live <strong>Amazon EKS</strong> inspection to a second agent that only exposes <strong>EKS MCP</strong> tools.
-You wire the handoff with <strong>Kibana Workflows</strong> and Agent Builder <strong><code>converse</code></strong> API, then validate the setup by breaking <strong><code>product-catalog</code></strong> <code>targetPort</code> and running two prompts.
+    <article><p>This guide shows how to keep a parent <strong>Elasticsearch Observability AI Agent</strong> focused on traces, logs, and service graphs for triaging application issues (opentelemetry-demo application in this case), running in AWS EKS, while you delegate live <strong>Amazon EKS</strong> inspection to a <strong>second agent</strong> that only exposes <strong>EKS MCP</strong> tools.
+You wire the handoff with <strong>Elastic Workflows</strong> and <strong>Agent Builder <code>converse</code></strong> API, then validate the setup by breaking <strong><code>product-catalog</code></strong> <code>targetPort</code> and running two prompts.
 Platform engineers and SREs who already run Elasticsearch for Observability get a repeatable pattern for safer, reviewable cluster access without overloading one agent with every tool.</p>
 <h2>Problem context</h2>
 <p>Outages often show up as correlated errors on multiple services like <strong>checkout</strong>, <strong>frontend</strong>, and <strong>recommendation</strong> in Elasticsearch.
 That pattern can mean a shared dependency, or it can mean Kubernetes is misleading callers: wrong <strong><code>targetPort</code></strong>, empty <strong>Endpoints</strong>, or pods that never become ready.
-Elasticsearch tells you <em>that</em> callers fail and <em>which</em> edges look wrong.
-It does not fetch the live <strong>Service</strong> spec or compare <strong><code>containerPort</code></strong> to <strong><code>targetPort</code></strong> for you.</p>
+Observability tools like Elasticsearch tell you <em>that</em> callers fail and <em>which</em> edges look wrong.
+They generally do not fetch the live <strong>Service</strong> spec or compare <strong><code>containerPort</code></strong> to <strong><code>targetPort</code></strong> for you.</p>
 <p>The <strong>Observability</strong> stock agent in Agent Builder is built for APM, logs, metrics, dependencies, and service maps.
 It is not a full EKS operations console.
-You could attach all <strong>EKS MCP</strong> tools to the same agent, but long tool lists increase wrong-tool calls, slow planning, and blast radius if a prompt accidentally asks for mutating actions.</p>
+You could attach all <strong>EKS MCP</strong> tools to the same agent, but long tool lists increase wrong-tool calls, slow planning, and increase blast radius if a prompt accidentally asks for mutating actions.</p>
 <h2>Solution overview</h2>
 <p>Use <strong>Observability Agent v2</strong> (a duplicate of the stock agent) as the only agent your SRE chats with.
 It reasons from Elasticsearch first.
 When evidence points to cluster config, it calls a <strong>workflow</strong> tool that invokes <strong><code>K8s Troubleshooter</code></strong> agent over <strong><code>/api/agent_builder/converse</code></strong> with a structured <strong><code>user_prompt</code></strong>.
-<strong>K8s Troubleshooter</strong> carries only the EKS MCP tools.
+<strong>K8s Troubleshooter</strong> agent carries only the EKS MCP tools.
 Cluster access stays scoped to one specialist identity, IAM, and RBAC you can audit like any other integration.</p>
-<p>Elasticsearch reaches EKS through an in-cluster <strong>bridge</strong> (<a href="https://github.com/ramp-km/aws-eks-mcp-setup"><strong>aws-eks-mcp-setup</strong></a>), exposed to Kibana as an <strong>MCP connector</strong> with a shared secret.
-Exact IAM, manifests, and connector fields stay in that README so this article stays focused on agents and Workflows.</p>
-<pre class="mermaid">flowchart LR
-  subgraph elastic [Elastic_Cloud]
-    OA[Observability_Agent_v2]
-    KT[K8s_Troubleshooter]
-    WF[k8s_troubleshooter_workflow]
-  end
-  subgraph eks [EKS]
-    Bridge[eks_mcp_bridge]
-    Demo[OTel_Demo]
-  end
-  OA --> WF
-  WF --> KT
-  KT --> Bridge
-  Bridge --> Demo</pre>
-
-
-
+<p>Elasticsearch reaches EKS through an in-cluster <strong>bridge</strong>, exposed to Kibana as an <strong>MCP connector</strong> with a shared secret.</p>
+<p><img src="/assets/images/chaining-elasticsearch-ai-agents-for-kubernetes-observability-and-troubleshooting/solution_overview.png" alt="Solution Overview"></p>
 <h2>Before you start</h2>
 <p>You need an <strong>EKS</strong> cluster with <code>kubectl</code> configured.
-You need <strong>Elasticsearch</strong> and <strong>Kibana</strong> with Observability data, an OTLP endpoint, and an API key for the demo.
-You need <strong>Kibana 9.3+</strong> with <strong>Agent Builder</strong> and rights to create agents, MCP tools, and <strong>Workflows</strong>(<strong>Technical Preview</strong>).
+You need an <strong>Elasticsearch 9.3+</strong>, an OTLP endpoint, Elasticsearch API key, <strong>Agent Builder</strong> and rights to create agents, MCP tools, and <strong>Workflows</strong>(<strong>Technical Preview</strong> as of writing this blog).
+You need an <strong>AI Connector</strong> to be setup in Elasticsearch, for connecting Elasticsearch with your <strong>LLM</strong>.
 Budget about <strong>two to four hours</strong> the first time you run these steps.</p>
 <h2>Implementation walkthrough</h2>
 <h3>Step 1: Deploy the OpenTelemetry Demo and ship telemetry</h3>
@@ -85,9 +68,9 @@ In Kibana (<strong>APM</strong>, <strong>Logs</strong>, or <strong>Service Map</
 <p><strong>Takeaway:</strong> If you see healthy traffic to <strong>product-catalog</strong>, you are ready for the failure drill.</p>
 <p><img src="chained-agents-eks-mcp/images/04-service-map-or-errors.png" alt="Healthy Elasticsearch Observability service map for demo services."></p>
 <h3>Step 2: Run the EKS MCP bridge, register the connector and bulk import EKS MCP tools</h3>
-<p>Complete <a href="https://github.com/ramp-km/aws-eks-mcp-setup/blob/main/README.md"><strong>aws-eks-mcp-setup</strong></a> end to end.
-The flow you would be following is : IAM for read-only cluster access, build and push the bridge image, IRSA (IAM roles for service accounts) and <strong>Kubernetes RBAC</strong>, deploy the bridge with a strong <strong><code>API_ACCESS_TOKEN</code></strong>, then expose the bridge as a service, test the MCP connection and bulk import tools.</p>
-<p><strong>Takeaway:</strong> A green MCP connector proves Kibana can reach the bridge before you bulk-import tools.</p>
+<p>Complete the steps in <a href="https://github.com/ramp-km/aws-eks-mcp-setup/blob/main/README.md"><strong>aws-eks-mcp-setup</strong></a> end to end.
+The flow you would be following is : Build and push the EKS MCP Bridge image, Create IAM policies, Create IRSA Service Account, Map IRSA role in aws-auth and apply Kubernetes RBAC, deploy the bridge with a strong API_ACCESS_TOKEN to the EKS cluster and Connect Elastic Agent Builder with EKS MCP.</p>
+<p><strong>Takeaway:</strong> A green MCP connector proves Kibana can reach the bridge.</p>
 <p><strong>Production notes:</strong> Restrict LoadBalancer security groups to known Elasticsearch egress, prefer <strong>TLS</strong> on real paths, store tokens in <strong>Secrets</strong>, and use <strong>read-only</strong> MCP modes when you only diagnose.</p>
 <p><img src="chained-agents-eks-mcp/images/05-eks-mcp.png" alt="MCP connector pointed at the EKS bridge."></p>
 <h3>Step 3: Create K8s Troubleshooter agent with EKS tools only</h3>
@@ -102,32 +85,33 @@ Optionally, Append short guidance that tells the parent when to call the workflo
 <p><strong>Takeaway:</strong> The parent <strong>Observability Agent v2</strong> stays an Observability-first interface for the user.</p>
 <p><img src="chained-agents-eks-mcp/images/01-observability-agent-v2.png" alt="Observability Agent v2 tools and instructions."></p>
 <h3>Step 5: Create the workflow and make it a callable tool</h3>
-<p>Create a new <strong>Kibana Workflow</strong> by importing the workflow definition at <a href="https://github.com/ramp-km/blogs/blob/main/Custom%20K8s%20Troubleshooter/k8s_troubleshooter_workflow.yaml"><strong>k8s_troubleshooter_workflow.yaml</strong></a> and enable it.</p>
+<p>Create a new <strong>Elastic Workflow</strong> by importing the workflow definition at <a href="https://github.com/ramp-km/blogs/blob/main/Custom%20K8s%20Troubleshooter/k8s_troubleshooter_workflow.yaml"><strong>k8s_troubleshooter_workflow.yaml</strong></a> and enable it.</p>
 <p><img src="chained-agents-eks-mcp/images/05-workflow.png" alt="Kibana Workflows editor: k8s_troubleshooter workflow YAML enabled."></p>
 <p>Create a new tool in agent builder, of type: <strong>Workflow</strong>, select <strong>k8s_troubleshooter</strong> workflow that you created, provide a suitable tool_id: <strong>custom.k8s_troubleshooter</strong> and a suitable tool description: <strong>Tool to triage and troubleshoot kubernetes related issues</strong></p>
 <p><img src="chained-agents-eks-mcp/images/05-workflow_tool_k8s_troubleshooter.png" alt="Agent Builder: Workflow tool wired to k8s_troubleshooter with custom tool id and description."></p>
-<p>On <strong>Observability Agent v2</strong>, attach the workflow tool that you just created.</p>
-<p><strong>Takeaway:</strong> The parent’s tool list should show the workflow, and <strong>K8s Troubleshooter</strong> should still answer when invoked alone.</p>
+<p>On <strong>Observability Agent v2</strong>, attach the <strong>custom.k8s_troubleshooter</strong> workflow tool that you just created.</p>
+<p><strong>Takeaway:</strong> The parent’s tool list should show the <strong>custom.k8s_troubleshooter</strong> workflow tool attached, and <strong>K8s Troubleshooter</strong> should still answer when invoked alone.</p>
 <p><img src="chained-agents-eks-mcp/images/03-workflow-tool-parent-agent.png" alt="Workflow registered as a tool on the parent agent."></p>
 <h3>Step 6: Inject the product-catalog Service misconfiguration</h3>
 <p>Save the original <strong><code>targetPort</code></strong>, then patch to a wrong value (example <strong>9999</strong>).</p>
 <pre><code class="language-bash">kubectl get svc -A | grep product-catalog
-kubectl get svc product-catalog -n &lt;namespace&gt; -o yaml
+kubectl get svc product-catalog -n YOUR_NAMESPACE -o yaml
 </code></pre>
-<pre><code class="language-bash">kubectl patch svc product-catalog -n &lt;namespace&gt; --type=&#39;json&#39; \
+<pre><code class="language-bash">kubectl patch svc product-catalog -n YOUR_NAMESPACE --type=&#39;json&#39; \
   -p=&#39;[{&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/spec/ports/0/targetPort&quot;, &quot;value&quot;: 9999}]&#39;
 </code></pre>
 <pre><code class="language-bash">kubectl rollout restart deployment/checkout deployment/recommendation deployment/frontend -n default
 </code></pre>
-<p>Callers still resolve <strong>Endpoints</strong>, but traffic lands on a port the container does not listen on, so Elasticsearch shows downstream errors on <strong>checkout</strong>, <strong>frontend</strong>, and <strong>recommendation</strong>.</p>
+<p>Callers still resolve <strong>Endpoints</strong>, but <strong>traffic lands on a port the container does not listen on</strong>, so Elasticsearch shows downstream errors on <strong>checkout</strong>, <strong>frontend</strong>, and <strong>recommendation</strong>.</p>
 <p><strong>Takeaway:</strong> You now have symptoms in Elasticsearch and a clear cluster-side fault.</p>
 <p><img src="chained-agents-eks-mcp/images/06-demo-services-service-map-or-errors.png" alt="Elasticsearch service map or error view after the misconfiguration."></p>
 <h3>Step 7: Run two prompts on the parent agent</h3>
 <p>Use Agent Builder chat on <strong>Observability Agent v2</strong>, not on the specialist.</p>
 <p><strong>Prompt 1:</strong> <em>Why are failure transactions increasing for services like checkout and frontend?</em></p>
 <p>Expect Observability tooling to narrow to <strong>product-catalog</strong>, without yet invoking <strong>custom.k8s_troubleshooter</strong> tool.</p>
-<p><strong>Prompt 2:</strong> <em>Why is product-catalog service not servicing any requests in &lt;&lt;insert your k8s cluster name&gt;&gt;? Is there any misconfiguration in the service?</em></p>
+<p><strong>Prompt 2:</strong> <em>Why is product-catalog service not servicing any requests in (insert your k8s cluster name)? Is there any misconfiguration in the service?</em></p>
 <p>Expect <strong>Observability Agent v2</strong> to call <strong>custom.k8s_troubleshooter</strong> tool, which invokes <strong>K8s Troubleshooter</strong> agent and read <strong>Service</strong>, <strong>Endpoints</strong>, and pods, compare <strong><code>targetPort</code></strong> to <strong><code>containerPort</code></strong>, and explain the mismatch with evidence.</p>
+<p><strong>Note:</strong> Depending on the LLM you are using, the response from AI agents may vary.</p>
 <p><strong>Takeaway:</strong> You see Observability AI Agent-led triage and cluster-grounded confirmation in one thread.</p>
 <p><img src="chained-agents-eks-mcp/images/07-ai-agent-chat-custom-k8s-troubleshooter.png" alt="Agent Builder chat on Observability Agent v2 invoking the K8s troubleshooter workflow."></p>
 <h3>Step 8: Roll back</h3>
@@ -137,7 +121,7 @@ kubectl get svc product-catalog -n &lt;namespace&gt; -o yaml
 </code></pre>
 <pre><code class="language-bash">kubectl rollout restart deployment/checkout deployment/recommendation deployment/frontend -n default
 </code></pre>
-<p>Add <strong><code>-n &lt;namespace&gt;</code></strong> when the Service is not in <strong><code>default</code></strong>.
+<p>Add <strong><code>-n YOUR_NAMESPACE</code></strong> when the Service is not in <strong><code>default</code></strong> (use your real namespace instead of the placeholder).
 Confirm <strong>product-catalog</strong> and upstream services recover in Elasticsearch and in the demo UI.</p>
 <h2>Validation and trade-offs</h2>
 <p>You validated that <strong>Observability Agent v2</strong> stays the main surface, that <strong>~20</strong> EKS tools live on one specialist <strong>K8s Troubleshooter</strong> agent, and that <strong>Workflow + converse API</strong> records a clear boundary for audits and reviews.</p>
